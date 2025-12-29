@@ -1,5 +1,6 @@
 package fi.antero.aurorastars.data.repository
 
+import fi.antero.aurorastars.data.model.weather.CloudCoverForecast
 import fi.antero.aurorastars.data.model.weather.ForecastItem
 import fi.antero.aurorastars.data.model.weather.OpenMeteoWeatherResponse
 import fi.antero.aurorastars.data.model.weather.WeatherData
@@ -8,6 +9,10 @@ import fi.antero.aurorastars.data.source.weather.WeatherRemoteDataSource
 import fi.antero.aurorastars.util.Result
 import fi.antero.aurorastars.util.TimeUtils
 import fi.antero.aurorastars.util.WeatherCodeMapper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 class WeatherRepositoryImpl(
@@ -16,48 +21,60 @@ class WeatherRepositoryImpl(
 ) : WeatherRepository {
 
     override suspend fun getWeather(lat: Double, lon: Double): Result<WeatherData> {
-        val placeName: String = geocoder.getPlaceName(lat, lon)
-        val result: Result<OpenMeteoWeatherResponse> = remote.fetchWeather(lat, lon)
 
-        return when (result) {
-            is Result.Success -> {
-                val dto: OpenMeteoWeatherResponse = result.data
+        return withContext(Dispatchers.IO) {
+            try {
+                val placeName: String = try {
+                    geocoder.getPlaceName(lat, lon)
+                } catch (e: Exception) {
+                    "Tuntematon sijainti"
+                }
 
-                val sunriseIso: String = dto.daily.sunrise.firstOrNull() ?: ""
-                val sunsetIso: String = dto.daily.sunset.firstOrNull() ?: ""
+                val result: Result<OpenMeteoWeatherResponse> = remote.fetchWeather(lat, lon)
 
-                val sunriseTime: String = TimeUtils.timeFromIso(sunriseIso)
-                val sunsetTime: String = TimeUtils.timeFromIso(sunsetIso)
+                when (result) {
+                    is Result.Success -> {
+                        val dto: OpenMeteoWeatherResponse = result.data
 
-                val temperatureC: Int = dto.current.temperature2m.roundToInt()
-                val weatherCode: Int = dto.current.weatherCode
-                val descriptionFi: String = WeatherCodeMapper.descriptionFi(weatherCode)
+                        val sunriseIso: String = dto.daily?.sunrise?.firstOrNull() ?: ""
+                        val sunsetIso: String = dto.daily?.sunset?.firstOrNull() ?: ""
 
-                val cloudCover: Int = dto.current.cloudCover
-                val windMs: Double = dto.current.windSpeed10m / 3.6
+                        val sunriseTime: String = TimeUtils.timeFromIso(sunriseIso)
+                        val sunsetTime: String = TimeUtils.timeFromIso(sunsetIso)
 
-                val isNight: Boolean = false
+                        val temperatureC: Int = dto.current?.temperature2m?.roundToInt() ?: 0
+                        val weatherCode: Int = dto.current?.weatherCode ?: 0
+                        val descriptionFi: String = WeatherCodeMapper.descriptionFi(weatherCode)
 
-                val forecasts: List<ForecastItem> = buildForecasts(dto)
+                        val cloudCover: Int = dto.current?.cloudCover ?: 0
+                        val windMs: Double = (dto.current?.windSpeed10m ?: 0.0) / 3.6
 
-                Result.Success(
-                    WeatherData(
-                        placeName = placeName,
-                        temperatureC = temperatureC,
-                        descriptionFi = descriptionFi,
-                        weatherCode = weatherCode,
-                        isNight = isNight,
-                        sunriseTime = sunriseTime,
-                        sunsetTime = sunsetTime,
-                        cloudCoverPercent = cloudCover,
-                        windSpeedMs = windMs,
-                        forecasts = forecasts
-                    )
-                )
+                        val forecasts: List<ForecastItem> = buildForecasts(dto)
+                        val cloudCoverForecast: CloudCoverForecast? = buildCloudCoverForecast(dto)
+
+                        Result.Success(
+                            WeatherData(
+                                placeName = placeName,
+                                temperatureC = temperatureC,
+                                descriptionFi = descriptionFi,
+                                weatherCode = weatherCode,
+                                isNight = false,
+                                sunriseTime = sunriseTime,
+                                sunsetTime = sunsetTime,
+                                cloudCoverPercent = cloudCover,
+                                windSpeedMs = windMs,
+                                forecasts = forecasts,
+                                cloudCoverForecast = cloudCoverForecast
+                            )
+                        )
+                    }
+
+                    is Result.Error -> Result.Error(result.message)
+                    Result.Loading -> Result.Loading
+                }
+            } catch (e: Exception) {
+                Result.Error("Virhe datan käsittelyssä: ${e.localizedMessage}")
             }
-
-            is Result.Error -> Result.Error(result.message)
-            Result.Loading -> Result.Loading
         }
     }
 
@@ -65,22 +82,69 @@ class WeatherRepositoryImpl(
         val h = dto.hourly ?: return emptyList()
 
         fun pick(idx: Int, label: String): ForecastItem? {
+            val temps = h.temperature2m ?: return null
+            val codes = h.weatherCode ?: return null
             if (idx < 0) return null
-            if (idx >= h.temperature2m.size) return null
-            if (idx >= h.weatherCode.size) return null
+            if (idx >= temps.size) return null
+            if (idx >= codes.size) return null
 
             return ForecastItem(
                 label = label,
-                temperatureC = h.temperature2m[idx].roundToInt(),
-                weatherCode = h.weatherCode[idx],
+                temperatureC = temps[idx].roundToInt(),
+                weatherCode = codes[idx],
                 isNight = false
             )
         }
 
         return listOfNotNull(
-            pick(3, "3h"),
-            pick(12, "12h"),
-            pick(24, "24h")
+            pick(6, "Aamu"),
+            pick(12, "Päivä"),
+            pick(18, "Ilta"),
+            pick(24, "Yö")
         )
+    }
+
+    private fun buildCloudCoverForecast(dto: OpenMeteoWeatherResponse): CloudCoverForecast? {
+        val h = dto.hourly ?: return null
+        val times = h.time ?: return null
+        val clouds = h.cloudCover ?: return null
+        if (times.isEmpty() || clouds.isEmpty()) return null
+
+        val nowIndex: Int = findNowIndex(times)
+        if (nowIndex < 0) return null
+
+        fun cloudAt(i: Int): Int {
+            return clouds.getOrNull(i) ?: clouds.getOrNull(nowIndex) ?: 0
+        }
+
+        return CloudCoverForecast(
+            now = cloudAt(nowIndex),
+            h3 = cloudAt(nowIndex + 3),
+            h6 = cloudAt(nowIndex + 6),
+            h12 = cloudAt(nowIndex + 12)
+        )
+    }
+
+    private fun findNowIndex(times: List<String>): Int {
+        val fmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+        val now: LocalDateTime = LocalDateTime.now()
+
+        var bestIdx = -1
+        var bestDiff = Long.MAX_VALUE
+
+        for (i in times.indices) {
+            val t = try {
+                LocalDateTime.parse(times[i], fmt)
+            } catch (e: Exception) {
+                continue
+            }
+            val diff = kotlin.math.abs(java.time.Duration.between(t, now).toMinutes())
+            if (diff < bestDiff) {
+                bestDiff = diff
+                bestIdx = i
+            }
+        }
+
+        return bestIdx
     }
 }

@@ -17,5 +17,6 @@ data class WeatherData(
     val sunsetTime: String,
     val cloudCoverPercent: Int,
     val windSpeedMs: Double,
-    val forecasts: List<ForecastItem>
+    val forecasts: List<ForecastItem> = emptyList(),
+    val cloudCoverForecast: CloudCoverForecast? = null
 )

@@ -11,4 +11,7 @@ object ApiRoutes {
                 "&hourly=temperature_2m,weather_code" +
                 "&timezone=auto"
     }
+    fun noaaPlanetaryKIndex(): String {
+        return "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
+    }
 }
