@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
@@ -24,6 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,9 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import fi.antero.aurorastars.data.model.weather.ForecastItem
 import fi.antero.aurorastars.ui.components.LoadingIndicator
 import fi.antero.aurorastars.viewmodel.location.LocationViewModel
 import fi.antero.aurorastars.viewmodel.weather.WeatherViewModel
+import kotlinx.coroutines.delay
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun WeatherScreen(navController: NavController) {
@@ -43,6 +52,12 @@ fun WeatherScreen(navController: NavController) {
 
     val weatherViewModel: WeatherViewModel = viewModel()
     val weatherState by weatherViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        if (locationState.location == null && !locationState.isLoading && locationState.error == null) {
+            locationViewModel.loadLocation()
+        }
+    }
 
     LaunchedEffect(locationState.location) {
         val loc = locationState.location
@@ -79,6 +94,8 @@ fun WeatherScreen(navController: NavController) {
             }
 
             data != null -> {
+                val todayTime: String = todayTimeText()
+
                 Text(
                     text = data.placeName,
                     style = MaterialTheme.typography.titleLarge,
@@ -88,21 +105,21 @@ fun WeatherScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Tänään",
+                    text = todayTime,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(26.dp))
 
                 val icon: ImageVector = weatherIcon(data.weatherCode)
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.height(88.dp)
+                    modifier = Modifier.size(120.dp)
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     text = "${data.temperatureC}°",
@@ -118,21 +135,21 @@ fun WeatherScreen(navController: NavController) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(26.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier.padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     InfoCard(
-                        title = "Nousu",
+                        title = "Auringonnousu",
                         value = data.sunriseTime
                     )
 
                     Spacer(modifier = Modifier.width(10.dp))
 
                     InfoCard(
-                        title = "Lasku",
+                        title = "Auringonlasku",
                         value = data.sunsetTime
                     )
                 }
@@ -158,12 +175,88 @@ fun WeatherScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(18.dp))
 
-                Text(
-                    text = "Pilvisyys vaikuttaa suoraan tähtitaivaan näkyvyyteen.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                ForecastRow(
+                    forecasts = data.forecasts,
+                    modifier = Modifier.padding(horizontal = 4.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun todayTimeText(): String {
+    var now by remember { mutableStateOf(LocalTime.now()) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            now = LocalTime.now()
+            delay(60_000)
+        }
+    }
+
+    val fmt = DateTimeFormatter.ofPattern("HH:mm")
+    return "Tänään ${now.format(fmt)}"
+}
+
+@Composable
+private fun ForecastRow(
+    forecasts: List<ForecastItem>,
+    modifier: Modifier = Modifier
+) {
+    if (forecasts.isEmpty()) return
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        forecasts.forEach { item ->
+            ForecastMiniCard(
+                label = item.label,
+                temperatureC = item.temperatureC,
+                weatherCode = item.weatherCode,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ForecastMiniCard(
+    label: String,
+    temperatureC: Int,
+    weatherCode: Int,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors()
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Icon(
+                imageVector = weatherIcon(weatherCode),
+                contentDescription = null,
+                modifier = Modifier.size(26.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "${temperatureC}°",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
