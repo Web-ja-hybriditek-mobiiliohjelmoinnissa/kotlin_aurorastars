@@ -5,42 +5,30 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OpenMeteoWeatherResponse(
-    val current: CurrentDto? = null,
-    val daily: DailyDto? = null,
-    val hourly: HourlyDto? = null
+    val current: CurrentWeather? = null,
+    val hourly: HourlyWeather? = null,
+    val daily: DailyWeather? = null
 )
 
 @Serializable
-data class CurrentDto(
-    @SerialName("temperature_2m")
-    val temperature2m: Double? = null,
-
-    @SerialName("weather_code")
-    val weatherCode: Int? = null,
-
-    @SerialName("cloud_cover")
-    val cloudCover: Int? = null,
-
-    @SerialName("wind_speed_10m")
-    val windSpeed10m: Double? = null
+data class CurrentWeather(
+    @SerialName("temperature_2m") val temperature2m: Double? = null,
+    @SerialName("weather_code") val weatherCode: Int? = null,
+    @SerialName("cloud_cover") val cloudCover: Int? = null,
+    @SerialName("wind_speed_10m") val windSpeed10m: Double? = null,
+    val time: String? = null
 )
 
 @Serializable
-data class DailyDto(
+data class HourlyWeather(
+    val time: List<String>? = null,
+    @SerialName("temperature_2m") val temperature2m: List<Double>? = null,
+    @SerialName("weather_code") val weatherCode: List<Int>? = null,
+    @SerialName("cloud_cover") val cloudCover: List<Int>? = null
+)
+
+@Serializable
+data class DailyWeather(
     val sunrise: List<String>? = null,
     val sunset: List<String>? = null
-)
-
-@Serializable
-data class HourlyDto(
-    val time: List<String>? = null,
-
-    @SerialName("temperature_2m")
-    val temperature2m: List<Double>? = null,
-
-    @SerialName("weather_code")
-    val weatherCode: List<Int>? = null,
-
-    @SerialName("cloud_cover")
-    val cloudCover: List<Int>? = null
 )

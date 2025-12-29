@@ -25,6 +25,7 @@ import fi.antero.aurorastars.util.AuroraTimeUtils
 import fi.antero.aurorastars.viewmodel.aurora.AuroraViewModel
 import fi.antero.aurorastars.viewmodel.location.LocationViewModel
 import fi.antero.aurorastars.viewmodel.weather.WeatherViewModel
+import fi.antero.aurorastars.ui.components.SmallValueCard
 
 @Composable
 fun AuroraScreen() {

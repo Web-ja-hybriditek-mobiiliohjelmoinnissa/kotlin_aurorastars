@@ -6,11 +6,12 @@ object ApiRoutes {
         return "https://api.open-meteo.com/v1/forecast" +
                 "?latitude=$lat" +
                 "&longitude=$lon" +
-                "&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m" +
+                "&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m,time" +
                 "&daily=sunrise,sunset" +
-                "&hourly=temperature_2m,weather_code" +
+                "&hourly=temperature_2m,weather_code,cloud_cover" +
                 "&timezone=auto"
     }
+
     fun noaaPlanetaryKIndex(): String {
         return "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
     }

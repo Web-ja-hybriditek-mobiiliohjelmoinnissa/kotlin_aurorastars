@@ -11,8 +11,6 @@ import fi.antero.aurorastars.util.TimeUtils
 import fi.antero.aurorastars.util.WeatherCodeMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 class WeatherRepositoryImpl(
@@ -49,6 +47,8 @@ class WeatherRepositoryImpl(
                         val cloudCover: Int = dto.current?.cloudCover ?: 0
                         val windMs: Double = (dto.current?.windSpeed10m ?: 0.0) / 3.6
 
+                        val isNight: Boolean = false
+
                         val forecasts: List<ForecastItem> = buildForecasts(dto)
                         val cloudCoverForecast: CloudCoverForecast? = buildCloudCoverForecast(dto)
 
@@ -58,7 +58,7 @@ class WeatherRepositoryImpl(
                                 temperatureC = temperatureC,
                                 descriptionFi = descriptionFi,
                                 weatherCode = weatherCode,
-                                isNight = false,
+                                isNight = isNight,
                                 sunriseTime = sunriseTime,
                                 sunsetTime = sunsetTime,
                                 cloudCoverPercent = cloudCover,
@@ -110,41 +110,25 @@ class WeatherRepositoryImpl(
         val clouds = h.cloudCover ?: return null
         if (times.isEmpty() || clouds.isEmpty()) return null
 
-        val nowIndex: Int = findNowIndex(times)
-        if (nowIndex < 0) return null
+        val currentTime = dto.current?.time
+        val baseIdx = if (currentTime != null) {
+            val idx = times.indexOf(currentTime)
+            if (idx >= 0) idx else 0
+        } else {
+            0
+        }
 
-        fun cloudAt(i: Int): Int {
-            return clouds.getOrNull(i) ?: clouds.getOrNull(nowIndex) ?: 0
+        fun pick(idx: Int): Int {
+            if (idx < 0) return 0
+            if (idx >= clouds.size) return clouds.lastOrNull() ?: 0
+            return clouds[idx]
         }
 
         return CloudCoverForecast(
-            now = cloudAt(nowIndex),
-            h3 = cloudAt(nowIndex + 3),
-            h6 = cloudAt(nowIndex + 6),
-            h12 = cloudAt(nowIndex + 12)
+            now = pick(baseIdx),
+            h3 = pick(baseIdx + 3),
+            h6 = pick(baseIdx + 6),
+            h12 = pick(baseIdx + 12)
         )
-    }
-
-    private fun findNowIndex(times: List<String>): Int {
-        val fmt: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
-        val now: LocalDateTime = LocalDateTime.now()
-
-        var bestIdx = -1
-        var bestDiff = Long.MAX_VALUE
-
-        for (i in times.indices) {
-            val t = try {
-                LocalDateTime.parse(times[i], fmt)
-            } catch (e: Exception) {
-                continue
-            }
-            val diff = kotlin.math.abs(java.time.Duration.between(t, now).toMinutes())
-            if (diff < bestDiff) {
-                bestDiff = diff
-                bestIdx = i
-            }
-        }
-
-        return bestIdx
     }
 }
