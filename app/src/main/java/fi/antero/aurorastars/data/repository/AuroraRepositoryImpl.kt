@@ -1,59 +1,55 @@
 package fi.antero.aurorastars.data.repository
 
 import fi.antero.aurorastars.data.model.aurora.AuroraData
-import fi.antero.aurorastars.data.model.aurora.NoaaPlanetaryKIndexEntry
 import fi.antero.aurorastars.data.source.aurora.AuroraRemoteDataSource
 import fi.antero.aurorastars.util.Result
-import kotlin.math.abs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 class AuroraRepositoryImpl(
     private val remote: AuroraRemoteDataSource
 ) : AuroraRepository {
 
-    override suspend fun getAurora(lat: Double): Result<AuroraData> {
-        val kpResult: Result<NoaaPlanetaryKIndexEntry> = remote.fetchLatestKp()
+    override suspend fun getAurora(): Result<AuroraData> {
+        return withContext(Dispatchers.IO) {
+            try {
+                when (val res = remote.fetchLatestKp()) {
+                    is Result.Success -> {
+                        val entry = res.data
 
-        return when (kpResult) {
-            is Result.Success -> {
-                val entry: NoaaPlanetaryKIndexEntry = kpResult.data
-                val kp: Double = entry.kpIndex
+                        val probability = kpToProbability(entry.kpIndex)
+                        val labelFi = kpToLabelFi(entry.kpIndex)
 
-                val threshold: Double = kpThresholdForLatitude(lat)
-                val raw: Double = (kp - threshold) * 25.0
-                val prob: Int = raw.coerceIn(0.0, 100.0).roundToInt()
+                        Result.Success(
+                            AuroraData(
+                                kpIndex = entry.kpIndex,
+                                probabilityPercent = probability,
+                                levelLabelFi = labelFi,
+                                timeTag = entry.timeTag
+                            )
+                        )
+                    }
 
-                val level: String = when {
-                    prob >= 70 -> "Hyvä"
-                    prob >= 40 -> "Kohtalainen"
-                    prob >= 15 -> "Heikko"
-                    else -> "Epätodennäköinen"
+                    is Result.Error -> Result.Error(res.message)
+                    Result.Loading -> Result.Loading
                 }
-
-                Result.Success(
-                    AuroraData(
-                        kpIndex = kp,
-                        probabilityPercent = prob,
-                        levelText = level,
-                        updatedTime = entry.timeTag
-                    )
-                )
+            } catch (e: Exception) {
+                Result.Error("Virhe revontulidatassa: ${e.localizedMessage}")
             }
-
-            is Result.Error -> Result.Error(kpResult.message)
-            Result.Loading -> Result.Loading
         }
     }
 
-    private fun kpThresholdForLatitude(lat: Double): Double {
-        val a: Double = abs(lat)
+    private fun kpToProbability(kp: Double): Int {
+        return ((kp / 9.0) * 100.0).roundToInt().coerceIn(0, 100)
+    }
+
+    private fun kpToLabelFi(kp: Double): String {
         return when {
-            a >= 69.0 -> 2.0
-            a >= 66.0 -> 3.0
-            a >= 63.0 -> 4.0
-            a >= 60.0 -> 5.0
-            a >= 57.0 -> 6.0
-            else -> 7.0
+            kp < 2.0 -> "Epätodennäköinen"
+            kp < 4.0 -> "Mahdollinen"
+            kp < 6.0 -> "Todennäköinen"
+            else -> "Erittäin todennäköinen"
         }
     }
 }

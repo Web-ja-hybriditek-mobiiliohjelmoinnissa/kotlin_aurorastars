@@ -12,11 +12,11 @@ data class OpenMeteoWeatherResponse(
 
 @Serializable
 data class CurrentWeather(
+    @SerialName("time") val time: String? = null,
     @SerialName("temperature_2m") val temperature2m: Double? = null,
     @SerialName("weather_code") val weatherCode: Int? = null,
     @SerialName("cloud_cover") val cloudCover: Int? = null,
-    @SerialName("wind_speed_10m") val windSpeed10m: Double? = null,
-    val time: String? = null
+    @SerialName("wind_speed_10m") val windSpeed10m: Double? = null
 )
 
 @Serializable

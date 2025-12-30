@@ -1,13 +1,14 @@
 package fi.antero.aurorastars.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,19 +17,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import fi.antero.aurorastars.R
 import fi.antero.aurorastars.ui.components.LoadingIndicator
+import fi.antero.aurorastars.ui.components.SmallValueCard
+import fi.antero.aurorastars.ui.components.TopClock
 import fi.antero.aurorastars.util.AuroraTimeUtils
 import fi.antero.aurorastars.viewmodel.aurora.AuroraViewModel
 import fi.antero.aurorastars.viewmodel.location.LocationViewModel
 import fi.antero.aurorastars.viewmodel.weather.WeatherViewModel
-import fi.antero.aurorastars.ui.components.SmallValueCard
 
 @Composable
-fun AuroraScreen() {
+fun AuroraScreen(navController: NavController) {
     val locationViewModel: LocationViewModel = viewModel()
     val locationState by locationViewModel.uiState.collectAsState()
 
@@ -56,49 +59,57 @@ fun AuroraScreen() {
         }
     }
 
+    Box(modifier = Modifier.fillMaxWidth().padding(18.dp)) {
+        TopClock(modifier = Modifier.align(Alignment.TopEnd))
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(18.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+
+
         val a = auroraState.data
 
         when {
             auroraState.isLoading || (a == null && auroraState.error == null) -> {
-                Spacer(modifier = Modifier.height(40.dp))
                 LoadingIndicator()
             }
 
             auroraState.error != null -> {
-                Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "Virhe: ${auroraState.error}",
+                    text = stringResource(R.string.error_prefix, auroraState.error ?: ""),
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
 
             a != null -> {
                 Text(
-                    text = "Revontulet",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "Kp ${String.format("%.1f", a.kpIndex)}",
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Bold
+                    text = stringResource(R.string.aurora_title),
+                    style = MaterialTheme.typography.titleLarge
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "${a.probabilityPercent} %",
-                    fontSize = 54.sp,
-                    fontWeight = FontWeight.Bold
+                    text = stringResource(
+                        R.string.kp_value,
+                        String.format("%.1f", a.kpIndex)
+                    ),
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Text(
+                    text = stringResource(
+                        R.string.percent_value_string,
+                        a.probabilityPercent
+                    ),
+                    style = MaterialTheme.typography.displayLarge
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -109,37 +120,33 @@ fun AuroraScreen() {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
-                    text = "Päivitetty: ${AuroraTimeUtils.noaaUtcToHelsinkiDisplay(a.timeTag)}",
+                    text = stringResource(
+                        R.string.updated_at,
+                        AuroraTimeUtils.noaaUtcToHelsinkiDisplay(a.timeTag)
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 val clouds = weatherState.data?.cloudCoverForecast
                 if (clouds != null) {
-                    Spacer(modifier = Modifier.height(22.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "Pilvisyysennuste",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        text = stringResource(R.string.cloud_forecast),
+                        style = MaterialTheme.typography.titleMedium
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        SmallValueCard("Nyt", "${clouds.now}%")
-                        Spacer(modifier = Modifier.width(10.dp))
-                        SmallValueCard("3h", "${clouds.h3}%")
-                        Spacer(modifier = Modifier.width(10.dp))
-                        SmallValueCard("6h", "${clouds.h6}%")
-                        Spacer(modifier = Modifier.width(10.dp))
-                        SmallValueCard("12h", "${clouds.h12}%")
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SmallValueCard(stringResource(R.string.now), "${clouds.now}%")
+                        SmallValueCard(stringResource(R.string.h3), "${clouds.h3}%")
+                        SmallValueCard(stringResource(R.string.h6), "${clouds.h6}%")
+                        SmallValueCard(stringResource(R.string.h12), "${clouds.h12}%")
                     }
                 }
             }

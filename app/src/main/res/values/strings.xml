@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">AuroraStars</string>
+    <string name="try_again">Yritä hetken päästä uudelleen.</string>
+    <string name="error_prefix">Virhe: %1$s</string>
+
+    <string name="today_time">Tänään %1$s</string>
+
+    <string name="sunrise">Auringonnousu</string>
+    <string name="sunset">Auringonlasku</string>
+    <string name="clouds">Pilvet</string>
+    <string name="wind">Tuuli</string>
+
+    <string name="percent_value">%1$d%%</string>
+    <string name="wind_value">%1$s m/s</string>
+
+    <string name="aurora_title">Revontulet</string>
+    <string name="kp_value">Kp %1$s</string>
+    <string name="updated_at">Päivitetty: %1$s</string>
+    <string name="cloud_forecast">Pilvisyysennuste</string>
+
+    <string name="now">Nyt</string>
+    <string name="h3">3h</string>
+    <string name="h6">6h</string>
+    <string name="h12">12h</string>
+
+    <string name="percent_value_string">%1$d %%</string>
+
 </resources>

@@ -11,6 +11,9 @@ import fi.antero.aurorastars.util.TimeUtils
 import fi.antero.aurorastars.util.WeatherCodeMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class WeatherRepositoryImpl(
@@ -50,7 +53,7 @@ class WeatherRepositoryImpl(
                         val isNight: Boolean = false
 
                         val forecasts: List<ForecastItem> = buildForecasts(dto)
-                        val cloudCoverForecast: CloudCoverForecast? = buildCloudCoverForecast(dto)
+                        val cloudForecast: CloudCoverForecast? = buildCloudCoverForecast(dto)
 
                         Result.Success(
                             WeatherData(
@@ -64,7 +67,7 @@ class WeatherRepositoryImpl(
                                 cloudCoverPercent = cloudCover,
                                 windSpeedMs = windMs,
                                 forecasts = forecasts,
-                                cloudCoverForecast = cloudCoverForecast
+                                cloudCoverForecast = cloudForecast
                             )
                         )
                     }
@@ -82,16 +85,15 @@ class WeatherRepositoryImpl(
         val h = dto.hourly ?: return emptyList()
 
         fun pick(idx: Int, label: String): ForecastItem? {
-            val temps = h.temperature2m ?: return null
-            val codes = h.weatherCode ?: return null
+            if (h.temperature2m == null || h.weatherCode == null) return null
             if (idx < 0) return null
-            if (idx >= temps.size) return null
-            if (idx >= codes.size) return null
+            if (idx >= h.temperature2m.size) return null
+            if (idx >= h.weatherCode.size) return null
 
             return ForecastItem(
                 label = label,
-                temperatureC = temps[idx].roundToInt(),
-                weatherCode = codes[idx],
+                temperatureC = h.temperature2m[idx].roundToInt(),
+                weatherCode = h.weatherCode[idx],
                 isNight = false
             )
         }
@@ -105,30 +107,43 @@ class WeatherRepositoryImpl(
     }
 
     private fun buildCloudCoverForecast(dto: OpenMeteoWeatherResponse): CloudCoverForecast? {
-        val h = dto.hourly ?: return null
-        val times = h.time ?: return null
-        val clouds = h.cloudCover ?: return null
-        if (times.isEmpty() || clouds.isEmpty()) return null
+        val hourly = dto.hourly ?: return null
+        val times = hourly.time ?: return null
+        val clouds = hourly.cloudCover ?: return null
 
-        val currentTime = dto.current?.time
-        val baseIdx = if (currentTime != null) {
-            val idx = times.indexOf(currentTime)
-            if (idx >= 0) idx else 0
-        } else {
-            0
+        val nowCloud = dto.current?.cloudCover ?: return null
+        val currentIso = dto.current?.time ?: return null
+
+        val fmt = DateTimeFormatter.ISO_DATE_TIME
+        val currentTime = runCatching { LocalDateTime.parse(currentIso, fmt) }.getOrNull() ?: return null
+
+        fun idxClosestTo(target: LocalDateTime): Int? {
+            var bestIdx: Int? = null
+            var bestDiff: Long = Long.MAX_VALUE
+
+            for (i in times.indices) {
+                val t = runCatching { LocalDateTime.parse(times[i], fmt) }.getOrNull() ?: continue
+                val diff = abs(java.time.Duration.between(t, target).toMinutes())
+                if (diff < bestDiff) {
+                    bestDiff = diff
+                    bestIdx = i
+                }
+            }
+            return bestIdx
         }
 
-        fun pick(idx: Int): Int {
-            if (idx < 0) return 0
-            if (idx >= clouds.size) return clouds.lastOrNull() ?: 0
+        val baseIdx = idxClosestTo(currentTime) ?: return null
+
+        fun pick(offsetHours: Int): Int {
+            val idx = (baseIdx + offsetHours).coerceIn(0, clouds.size - 1)
             return clouds[idx]
         }
 
         return CloudCoverForecast(
-            now = pick(baseIdx),
-            h3 = pick(baseIdx + 3),
-            h6 = pick(baseIdx + 6),
-            h12 = pick(baseIdx + 12)
+            now = nowCloud,
+            h3 = pick(3),
+            h6 = pick(6),
+            h12 = pick(12)
         )
     }
 }

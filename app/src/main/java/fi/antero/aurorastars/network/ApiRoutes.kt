@@ -6,7 +6,7 @@ object ApiRoutes {
         return "https://api.open-meteo.com/v1/forecast" +
                 "?latitude=$lat" +
                 "&longitude=$lon" +
-                "&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m,time" +
+                "&current=temperature_2m,weather_code,cloud_cover,wind_speed_10m" +
                 "&daily=sunrise,sunset" +
                 "&hourly=temperature_2m,weather_code,cloud_cover" +
                 "&timezone=auto"
