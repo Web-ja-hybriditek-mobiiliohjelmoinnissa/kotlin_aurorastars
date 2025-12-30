@@ -51,7 +51,7 @@ fun AuroraScreen(navController: NavController) {
         val loc = locationState.location ?: return@LaunchedEffect
 
         if (!auroraState.isLoading && auroraState.data == null && auroraState.error == null) {
-            auroraViewModel.loadAurora()
+            auroraViewModel.loadAurora(loc.latitude)
         }
 
         if (!weatherState.isLoading && weatherState.data == null && weatherState.error == null) {

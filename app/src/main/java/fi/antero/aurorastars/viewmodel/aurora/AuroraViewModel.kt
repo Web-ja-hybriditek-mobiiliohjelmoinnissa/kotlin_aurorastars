@@ -17,11 +17,11 @@ class AuroraViewModel(
     private val _uiState = MutableStateFlow(AuroraUiState())
     val uiState: StateFlow<AuroraUiState> = _uiState
 
-    fun loadAurora() {
+    fun loadAurora(lat: Double) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            when (val res = repo.getAurora()) {
+            when (val res = repo.getAurora(lat)) {
                 is Result.Success -> _uiState.value = AuroraUiState(isLoading = false, data = res.data, error = null)
                 is Result.Error -> _uiState.value = AuroraUiState(isLoading = false, data = null, error = res.message)
                 Result.Loading -> _uiState.value = _uiState.value.copy(isLoading = true)

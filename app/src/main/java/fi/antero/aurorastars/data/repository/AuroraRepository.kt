@@ -4,5 +4,5 @@ import fi.antero.aurorastars.data.model.aurora.AuroraData
 import fi.antero.aurorastars.util.Result
 
 interface AuroraRepository {
-    suspend fun getAurora(): Result<AuroraData>
+    suspend fun getAurora(lat: Double): Result<AuroraData>
 }
