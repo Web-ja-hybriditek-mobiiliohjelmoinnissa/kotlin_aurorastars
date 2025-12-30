@@ -1,24 +1,31 @@
 package fi.antero.aurorastars.viewmodel.sky
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import fi.antero.aurorastars.util.Result
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import java.util.Locale
 
 class SkyViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(SkyUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            delay(800)
-            _uiState.value = SkyUiState(
-                Result.Success("Fake tähtikartta – kupoli näkymä")
-            )
-        }
+    fun loadStarMap(lat: Double, lon: Double) {
+        val latStr = String.format(Locale.US, "%.4f", lat)
+        val lonStr = String.format(Locale.US, "%.4f", lon)
+
+        val url = "https://virtualsky.lco.global/embed/index.html" +
+                "?longitude=$lonStr" +
+                "&latitude=$latStr" +
+                "&projection=stereo" +
+                "&constellations=true" +
+                "&constellationlabels=true" +
+                "&showstarlabels=true" +
+                "&live=true" +
+                "&az=180" +
+                "&scalestars=2" +
+                "&mag=5"
+
+        _uiState.value = SkyUiState(starMapUrl = url)
     }
 }
