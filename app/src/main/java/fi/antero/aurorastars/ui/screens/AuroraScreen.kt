@@ -3,13 +3,11 @@ package fi.antero.aurorastars.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,10 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import fi.antero.aurorastars.R
+import fi.antero.aurorastars.ui.components.ErrorMessage
 import fi.antero.aurorastars.ui.components.LoadingIndicator
-import fi.antero.aurorastars.ui.components.SmallValueCard
 import fi.antero.aurorastars.ui.components.TopClock
-import fi.antero.aurorastars.util.AuroraTimeUtils
+import fi.antero.aurorastars.ui.components.aurora.AuroraMainInfo
+import fi.antero.aurorastars.ui.components.aurora.CloudForecastSection
 import fi.antero.aurorastars.viewmodel.aurora.AuroraViewModel
 import fi.antero.aurorastars.viewmodel.location.LocationViewModel
 import fi.antero.aurorastars.viewmodel.weather.WeatherViewModel
@@ -71,89 +70,32 @@ fun AuroraScreen(navController: NavController) {
         )
 
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            val a = auroraState.data
+            val data = auroraState.data
 
             when {
-                auroraState.isLoading || (a == null && auroraState.error == null) -> {
+                auroraState.isLoading || (data == null && auroraState.error == null) -> {
                     LoadingIndicator()
                 }
 
                 auroraState.error != null -> {
-                    Text(
-                        text = stringResource(R.string.error_prefix, auroraState.error ?: ""),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    ErrorMessage(message = stringResource(R.string.error_prefix, auroraState.error ?: ""))
+                    Button(onClick = { locationViewModel.loadLocation() }) {
+                        Text(stringResource(R.string.try_again))
+                    }
                 }
 
-                a != null -> {
-                    Text(
-                        text = stringResource(R.string.aurora_title),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = stringResource(
-                            R.string.kp_value,
-                            String.format("%.1f", a.kpIndex)
-                        ),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Text(
-                        text = stringResource(
-                            R.string.percent_value_string,
-                            a.probabilityPercent
-                        ),
-                        style = MaterialTheme.typography.displayLarge
-                    )
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = a.levelLabelFi,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    Text(
-                        text = stringResource(
-                            R.string.updated_at,
-                            AuroraTimeUtils.noaaUtcToHelsinkiDisplay(a.timeTag)
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                data != null -> {
+                    AuroraMainInfo(data)
 
                     val clouds = weatherState.data?.cloudCoverForecast
                     if (clouds != null) {
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        Text(
-                            text = stringResource(R.string.cloud_forecast),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
-                        ) {
-                            SmallValueCard(stringResource(R.string.now), "${clouds.now}%")
-                            SmallValueCard(stringResource(R.string.h3), "${clouds.h3}%")
-                            SmallValueCard(stringResource(R.string.h6), "${clouds.h6}%")
-                            SmallValueCard(stringResource(R.string.h12), "${clouds.h12}%")
-                        }
+                        CloudForecastSection(clouds)
                     }
                 }
             }

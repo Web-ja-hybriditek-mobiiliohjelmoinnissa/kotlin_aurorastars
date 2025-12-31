@@ -3,13 +3,12 @@ package fi.antero.aurorastars.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,11 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import fi.antero.aurorastars.R
-import fi.antero.aurorastars.ui.components.ForecastRow
-import fi.antero.aurorastars.ui.components.InfoCard
+import fi.antero.aurorastars.ui.components.ErrorMessage
 import fi.antero.aurorastars.ui.components.LoadingIndicator
 import fi.antero.aurorastars.ui.components.TopClock
-import fi.antero.aurorastars.util.weatherIcon
+import fi.antero.aurorastars.ui.components.weather.ForecastRow
+import fi.antero.aurorastars.ui.components.weather.WeatherDetailsSection
+import fi.antero.aurorastars.ui.components.weather.WeatherMainInfo
 import fi.antero.aurorastars.viewmodel.location.LocationViewModel
 import fi.antero.aurorastars.viewmodel.weather.WeatherViewModel
 
@@ -66,7 +66,8 @@ fun WeatherScreen(navController: NavController) {
 
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -76,82 +77,22 @@ fun WeatherScreen(navController: NavController) {
                 }
 
                 weatherState.error != null -> {
-                    Text(
-                        text = stringResource(R.string.error_prefix, weatherState.error ?: ""),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.try_again),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    ErrorMessage(message = stringResource(R.string.error_prefix, weatherState.error ?: ""))
+                    Button(onClick = { locationViewModel.loadLocation() }) {
+                        Text(stringResource(R.string.try_again))
+                    }
                 }
 
                 data != null -> {
-                    Text(
-                        text = data.placeName,
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    WeatherMainInfo(data)
 
-                    Icon(
-                        imageVector = weatherIcon(data.weatherCode),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .padding(top = 18.dp)
-                            .size(110.dp)
-                    )
-
-                    Text(
-                        text = "${data.temperatureC}°",
-                        style = MaterialTheme.typography.displayLarge
-                    )
-
-                    Text(
-                        text = data.descriptionFi,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.padding(top = 18.dp)
-                    ) {
-                        InfoCard(
-                            title = stringResource(R.string.sunrise),
-                            value = data.sunriseTime,
-                            modifier = Modifier.size(width = 150.dp, height = 88.dp)
-                        )
-                        InfoCard(
-                            title = stringResource(R.string.sunset),
-                            value = data.sunsetTime,
-                            modifier = Modifier.size(width = 150.dp, height = 88.dp)
-                        )
-                    }
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.padding(top = 10.dp)
-                    ) {
-                        InfoCard(
-                            title = stringResource(R.string.clouds),
-                            value = stringResource(R.string.percent_value, data.cloudCoverPercent),
-                            modifier = Modifier.size(width = 150.dp, height = 88.dp)
-                        )
-                        InfoCard(
-                            title = stringResource(R.string.wind),
-                            value = stringResource(
-                                R.string.wind_value,
-                                String.format("%.1f", data.windSpeedMs)
-                            ),
-                            modifier = Modifier.size(width = 150.dp, height = 88.dp)
-                        )
-                    }
+                    WeatherDetailsSection(data)
 
                     ForecastRow(
                         forecasts = data.forecasts,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 14.dp)
+                            .padding(top = 24.dp, bottom = 16.dp)
                     )
                 }
             }

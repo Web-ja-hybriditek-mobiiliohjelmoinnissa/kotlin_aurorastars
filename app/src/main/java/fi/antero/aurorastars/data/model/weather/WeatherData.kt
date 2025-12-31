@@ -1,16 +1,17 @@
 package fi.antero.aurorastars.data.model.weather
 
+
 data class ForecastItem(
-    val label: String,
+    val hour: Int, // Esim. 6, 12, 18, 24
     val temperatureC: Int,
     val weatherCode: Int,
     val isNight: Boolean
 )
 
+
 data class WeatherData(
     val placeName: String,
     val temperatureC: Int,
-    val descriptionFi: String,
     val weatherCode: Int,
     val isNight: Boolean,
     val sunriseTime: String,

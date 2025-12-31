@@ -1,4 +1,4 @@
-package fi.antero.aurorastars.ui.components
+package fi.antero.aurorastars.ui.components.aurora
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,12 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SmallValueCard(
+fun AuroraValueCard(
     title: String,
-    value: String
+    value: String,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .width(78.dp)
             .height(64.dp),
         colors = CardDefaults.cardColors()

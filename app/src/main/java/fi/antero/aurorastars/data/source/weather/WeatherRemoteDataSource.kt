@@ -5,6 +5,7 @@ import fi.antero.aurorastars.network.ApiRoutes
 import fi.antero.aurorastars.network.NetworkClient
 import fi.antero.aurorastars.network.safeApiCall
 import fi.antero.aurorastars.util.Result
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 class WeatherRemoteDataSource {
@@ -13,7 +14,7 @@ class WeatherRemoteDataSource {
         val url: String = ApiRoutes.openMeteoWeather(lat, lon)
 
         return safeApiCall {
-            NetworkClient.httpClient.get(url)
+            NetworkClient.httpClient.get(url).body<OpenMeteoWeatherResponse>()
         }
     }
 }

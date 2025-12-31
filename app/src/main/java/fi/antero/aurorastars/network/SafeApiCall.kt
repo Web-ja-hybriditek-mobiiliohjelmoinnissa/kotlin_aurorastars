@@ -1,18 +1,34 @@
 package fi.antero.aurorastars.network
 
 import fi.antero.aurorastars.util.Result
-import io.ktor.client.call.body
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.RedirectResponseException
+import io.ktor.client.plugins.ServerResponseException
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
-suspend inline fun <reified T> safeApiCall(
-    call: () -> HttpResponse
-): Result<T> {
+
+suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> {
     return try {
-        val response: HttpResponse = call()
-        val data: T = response.body()
-        Result.Success(data)
+        Result.Success(apiCall())
     } catch (e: Exception) {
-        val message: String = e.message ?: "Verkkovirhe"
-        Result.Error(message)
+        val errorMessage = when (e) {
+
+            is UnknownHostException -> "Ei verkkoyhteyttä. Tarkista, että puhelin on verkossa."
+
+            is SocketTimeoutException -> "Yhteys aikakatkaistiin. Palvelin on hidas."
+
+            is ClientRequestException -> "Hakuvirhe (${e.response.status.value}). Tarkista tiedot."
+
+            is ServerResponseException -> "Palvelinvirhe (${e.response.status.value}). Yritä myöhemmin."
+
+            is RedirectResponseException -> "Odottamaton uudelleenohjaus."
+
+            is IOException -> "Verkkovirhe. Tarkista yhteys."
+
+            else -> e.message ?: "Tuntematon virhe tapahtui: ${e.javaClass.simpleName}"
+        }
+        Result.Error(errorMessage)
     }
 }

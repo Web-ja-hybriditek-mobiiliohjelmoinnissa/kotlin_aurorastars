@@ -18,13 +18,13 @@ object AuroraTimeUtils {
 
     fun noaaUtcToHelsinkiDisplay(timeTag: String): String {
         return try {
-            // 1) ISO-8601 (harvinaisempi mutta oikea)
+
             val instant = Instant.parse(timeTag)
             outputFormatter.withZone(helsinkiZone).format(instant)
 
         } catch (_: Exception) {
             try {
-                // 2) NOAA:n käyttämä "yyyy-MM-dd HH:mm:ss.SSS" (UTC)
+
                 val localUtc = LocalDateTime.parse(timeTag, noaaFormatter)
                 val helsinkiTime = localUtc
                     .atZone(ZoneOffset.UTC)

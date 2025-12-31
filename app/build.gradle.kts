@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.android)
+    implementation("io.ktor:ktor-serialization-gson:2.3.7")
 
     implementation(libs.kotlinx.serialization.json)
 
@@ -79,6 +80,8 @@ dependencies {
     implementation(libs.play.services.location)
 
     implementation(libs.androidx.compose.material.icons.extended)
+
+
 
 
     testImplementation(libs.junit)

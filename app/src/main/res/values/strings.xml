@@ -1,28 +1,62 @@
 <resources>
     <string name="app_name">AuroraStars</string>
-    <string name="try_again">Yritä hetken päästä uudelleen.</string>
+
+    <string name="nav_weather">Sää</string>
+    <string name="nav_aurora">Revontulet</string>
+    <string name="nav_sky">Tähtikartta</string>
+    <string name="nav_info">Info</string>
+
+    <string name="loading">Ladataan...</string>
+    <string name="try_again">Yritä uudelleen</string>
     <string name="error_prefix">Virhe: %1$s</string>
+    <string name="updated_at">Päivitetty: %1$s</string>
+    <string name="now">Nyt</string>
 
+    <string name="weather_title">Sääennuste</string>
     <string name="today_time">Tänään %1$s</string>
-
     <string name="sunrise">Auringonnousu</string>
     <string name="sunset">Auringonlasku</string>
     <string name="clouds">Pilvet</string>
     <string name="wind">Tuuli</string>
-
-    <string name="percent_value">%1$d%%</string>
     <string name="wind_value">%1$s m/s</string>
-
-    <string name="aurora_title">Revontulet</string>
-    <string name="kp_value">Kp %1$s</string>
-    <string name="updated_at">Päivitetty: %1$s</string>
     <string name="cloud_forecast">Pilvisyysennuste</string>
-
-    <string name="now">Nyt</string>
     <string name="h3">3h</string>
     <string name="h6">6h</string>
     <string name="h12">12h</string>
 
-    <string name="percent_value_string">%1$d %%</string>
+    <string name="aurora_title">Revontulet</string>
+    <string name="kp_index">Kp-indeksi</string>
+    <string name="kp_value">Kp %1$s</string>
+    <string name="percent_value">%1$d%%</string>
+    <string name="probability">Todennäköisyys</string>
 
+    <string name="prob_none">Ei odotettavissa</string>
+    <string name="prob_low">Epätodennäköinen</string>
+    <string name="prob_medium">Mahdollinen</string>
+    <string name="prob_high">Todennäköinen</string>
+    <string name="prob_very_high">Erittäin todennäköinen</string>
+
+    <string name="info_title">Tietoja</string>
+    <string name="info_description">AuroraStars on natiivi Android-sovellus.</string>
+    <string name="info_features_title">Ominaisuudet</string>
+    <string name="info_feature_weather">Sää</string>
+    <string name="info_feature_aurora">Revontulet</string>
+    <string name="info_feature_sky">Tähtikartta</string>
+    <string name="info_tech_title">Teknologiat</string>
+    <string name="info_tech_desc">Kotlin, Jetpack Compose, Ktor.</string>
+    <string name="info_author_title">Tekijä</string>
+    <string name="info_author_name">Oma Nimi</string>
+    <string name="info_credits_title">Lähdeaineisto</string>
+    <string name="credit_virtualsky_title">VirtualSky</string>
+    <string name="credit_virtualsky_license">BSD 3-Clause</string>
+    <string name="credit_openmeteo_title">Open-Meteo</string>
+    <string name="credit_openmeteo_license">CC BY 4.0</string>
+    <string name="credit_noaa_title">NOAA</string>
+    <string name="credit_noaa_license">Public Domain</string>
+    <string name="info_version">Versio 1.0.0</string>
+
+    <string name="time_morning">Aamu</string>
+    <string name="time_day">Päivä</string>
+    <string name="time_evening">Ilta</string>
+    <string name="time_night">Yö</string>
 </resources>

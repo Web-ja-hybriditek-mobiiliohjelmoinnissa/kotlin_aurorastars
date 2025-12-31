@@ -8,7 +8,6 @@ import fi.antero.aurorastars.data.source.location.GeocoderDataSource
 import fi.antero.aurorastars.data.source.weather.WeatherRemoteDataSource
 import fi.antero.aurorastars.util.Result
 import fi.antero.aurorastars.util.TimeUtils
-import fi.antero.aurorastars.util.WeatherCodeMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -45,7 +44,7 @@ class WeatherRepositoryImpl(
 
                         val temperatureC: Int = dto.current?.temperature2m?.roundToInt() ?: 0
                         val weatherCode: Int = dto.current?.weatherCode ?: 0
-                        val descriptionFi: String = WeatherCodeMapper.descriptionFi(weatherCode)
+                        // descriptionFi POISTETTU täältä
 
                         val cloudCover: Int = dto.current?.cloudCover ?: 0
                         val windMs: Double = (dto.current?.windSpeed10m ?: 0.0) / 3.6
@@ -59,7 +58,6 @@ class WeatherRepositoryImpl(
                             WeatherData(
                                 placeName = placeName,
                                 temperatureC = temperatureC,
-                                descriptionFi = descriptionFi,
                                 weatherCode = weatherCode,
                                 isNight = isNight,
                                 sunriseTime = sunriseTime,
@@ -84,14 +82,14 @@ class WeatherRepositoryImpl(
     private fun buildForecasts(dto: OpenMeteoWeatherResponse): List<ForecastItem> {
         val h = dto.hourly ?: return emptyList()
 
-        fun pick(idx: Int, label: String): ForecastItem? {
+        fun pick(idx: Int, hourVal: Int): ForecastItem? {
             if (h.temperature2m == null || h.weatherCode == null) return null
             if (idx < 0) return null
             if (idx >= h.temperature2m.size) return null
             if (idx >= h.weatherCode.size) return null
 
             return ForecastItem(
-                label = label,
+                hour = hourVal,
                 temperatureC = h.temperature2m[idx].roundToInt(),
                 weatherCode = h.weatherCode[idx],
                 isNight = false
@@ -99,10 +97,10 @@ class WeatherRepositoryImpl(
         }
 
         return listOfNotNull(
-            pick(6, "Aamu"),
-            pick(12, "Päivä"),
-            pick(18, "Ilta"),
-            pick(24, "Yö")
+            pick(6, 6),
+            pick(12, 12),
+            pick(18, 18),
+            pick(24, 24)
         )
     }
 
