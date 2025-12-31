@@ -8,27 +8,19 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
-
 suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> {
     return try {
         Result.Success(apiCall())
     } catch (e: Exception) {
-        val errorMessage = when (e) {
-
-            is UnknownHostException -> "Ei verkkoyhteyttä. Tarkista, että puhelin on verkossa."
-
-            is SocketTimeoutException -> "Yhteys aikakatkaistiin. Palvelin on hidas."
-
-            is ClientRequestException -> "Hakuvirhe (${e.response.status.value}). Tarkista tiedot."
-
-            is ServerResponseException -> "Palvelinvirhe (${e.response.status.value}). Yritä myöhemmin."
-
-            is RedirectResponseException -> "Odottamaton uudelleenohjaus."
-
-            is IOException -> "Verkkovirhe. Tarkista yhteys."
-
-            else -> e.message ?: "Tuntematon virhe tapahtui: ${e.javaClass.simpleName}"
+        val errorCode = when (e) {
+            is UnknownHostException -> "NETWORK_NO_CONNECTION"
+            is SocketTimeoutException -> "NETWORK_TIMEOUT"
+            is ClientRequestException -> "API_CLIENT_ERROR_${e.response.status.value}"
+            is ServerResponseException -> "API_SERVER_ERROR_${e.response.status.value}"
+            is RedirectResponseException -> "API_REDIRECT"
+            is IOException -> "NETWORK_IO_ERROR"
+            else -> "NETWORK_UNKNOWN_ERROR"
         }
-        Result.Error(errorMessage)
+        Result.Error(errorCode)
     }
 }

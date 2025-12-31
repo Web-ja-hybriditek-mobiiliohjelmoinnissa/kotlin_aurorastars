@@ -84,7 +84,8 @@ fun AuroraScreen(navController: NavController) {
                 }
 
                 auroraState.error != null -> {
-                    ErrorMessage(message = stringResource(R.string.error_prefix, auroraState.error ?: ""))
+
+                    ErrorMessage(errorCode = auroraState.error)
                     Button(onClick = { locationViewModel.loadLocation() }) {
                         Text(stringResource(R.string.try_again))
                     }

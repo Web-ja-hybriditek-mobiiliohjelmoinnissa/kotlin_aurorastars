@@ -77,7 +77,7 @@ fun WeatherScreen(navController: NavController) {
                 }
 
                 weatherState.error != null -> {
-                    ErrorMessage(message = stringResource(R.string.error_prefix, weatherState.error ?: ""))
+                    ErrorMessage(errorCode = weatherState.error)
                     Button(onClick = { locationViewModel.loadLocation() }) {
                         Text(stringResource(R.string.try_again))
                     }

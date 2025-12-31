@@ -1,5 +1,6 @@
 package fi.antero.aurorastars.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +13,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import fi.antero.aurorastars.R
 import fi.antero.aurorastars.ui.components.InfoCard
 import fi.antero.aurorastars.ui.components.PageTitle
 
@@ -23,31 +27,25 @@ fun InfoScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
 
-        PageTitle(title = "Tietoja")
+        PageTitle(title = stringResource(R.string.info_title))
 
         Column(modifier = Modifier.padding(16.dp)) {
 
-            Text(
-                text = "AuroraStars on natiivi Android-sovellus, joka on suunniteltu revontulien, sään ja tähtitaivaan tarkkailuun.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            InfoSectionTitle(stringResource(R.string.info_features_title))
+            BulletPoint(stringResource(R.string.info_feature_weather))
+            BulletPoint(stringResource(R.string.info_feature_aurora))
+            BulletPoint(stringResource(R.string.info_feature_sky))
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            InfoSectionTitle("Ominaisuudet")
-            BulletPoint("Paikallinen sääennuste")
-            BulletPoint("Revontulien todennäköisyys")
-            BulletPoint("Interaktiivinen tähtikartta")
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            InfoSectionTitle("Teknologiat")
+            InfoSectionTitle(stringResource(R.string.info_tech_title))
             Text(
-                text = "Kotlin, Jetpack Compose, Retrofit, MVVM, Coroutines.",
+                text = stringResource(R.string.info_tech_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -56,62 +54,39 @@ fun InfoScreen(navController: NavController) {
             HorizontalDivider()
             Spacer(modifier = Modifier.height(24.dp))
 
-
             InfoCard(
-                title = "Tekijä",
-                value = "Antero / Opiskelija",
+                title = stringResource(R.string.info_author_title),
+                value = stringResource(R.string.info_author_name),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Lähdeaineisto & Lisenssit",
+                text = stringResource(R.string.info_credits_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "• Tähtikartta: Las Cumbres Observatory (VirtualSky)",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+            CreditItem(
+                title = stringResource(R.string.credit_virtualsky_title),
+                license = stringResource(R.string.credit_virtualsky_license)
             )
-            Text(
-                text = "   Lisenssi: BSD 3-Clause License",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
+            CreditItem(
+                title = stringResource(R.string.credit_openmeteo_title),
+                license = stringResource(R.string.credit_openmeteo_license)
             )
-
-            Text(
-                text = "• Säädata: Open-Meteo.com",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "   Lisenssi: CC BY 4.0",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Text(
-                text = "• Revontulidata: NOAA Space Weather Prediction Center",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "   Lisenssi: Public Domain (U.S. Gov)",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
+            CreditItem(
+                title = stringResource(R.string.credit_noaa_title),
+                license = stringResource(R.string.credit_noaa_license)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Versio 1.0.0",
+                text = stringResource(R.string.info_version),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -121,7 +96,7 @@ fun InfoScreen(navController: NavController) {
 }
 
 @Composable
-fun InfoSectionTitle(text: String) {
+private fun InfoSectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleLarge,
@@ -131,7 +106,7 @@ fun InfoSectionTitle(text: String) {
 }
 
 @Composable
-fun BulletPoint(text: String) {
+private fun BulletPoint(text: String) {
     Text(
         text = "• $text",
         style = MaterialTheme.typography.bodyMedium,
@@ -139,3 +114,18 @@ fun BulletPoint(text: String) {
     )
 }
 
+@Composable
+private fun CreditItem(title: String, license: String) {
+    Column(modifier = Modifier.padding(bottom = 8.dp)) {
+        Text(
+            text = "• $title",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "   ${stringResource(R.string.nav_info)}: $license",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}

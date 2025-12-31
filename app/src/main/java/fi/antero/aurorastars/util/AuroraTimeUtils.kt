@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 
 object AuroraTimeUtils {
 
-    private val helsinkiZone = ZoneId.of("Europe/Helsinki")
+    private val deviceZone = ZoneId.systemDefault()
 
     private val outputFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -20,20 +20,21 @@ object AuroraTimeUtils {
         return try {
 
             val instant = Instant.parse(timeTag)
-            outputFormatter.withZone(helsinkiZone).format(instant)
+            outputFormatter.withZone(deviceZone).format(instant)
 
         } catch (_: Exception) {
             try {
 
                 val localUtc = LocalDateTime.parse(timeTag, noaaFormatter)
-                val helsinkiTime = localUtc
+                val localTime = localUtc
                     .atZone(ZoneOffset.UTC)
-                    .withZoneSameInstant(helsinkiZone)
+                    .withZoneSameInstant(deviceZone)
 
-                helsinkiTime.format(outputFormatter)
+                localTime.format(outputFormatter)
 
             } catch (_: Exception) {
-                timeTag // fallback – ei kaadeta UI:ta
+
+                timeTag
             }
         }
     }

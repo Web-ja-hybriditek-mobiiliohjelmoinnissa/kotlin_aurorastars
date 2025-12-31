@@ -18,10 +18,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import fi.antero.aurorastars.R
 import fi.antero.aurorastars.ui.components.ErrorMessage
 import fi.antero.aurorastars.ui.components.LoadingIndicator
 import fi.antero.aurorastars.viewmodel.location.LocationViewModel
@@ -62,9 +64,11 @@ fun SkyScreen(navController: NavController) {
                 LoadingIndicator()
             }
             if (locState.error != null) {
-                ErrorMessage(message = locState.error!!)
+
+                ErrorMessage(errorCode = locState.error)
+
                 Button(onClick = { locationViewModel.loadLocation() }) {
-                    Text("Yritä uudelleen")
+                    Text(stringResource(R.string.try_again))
                 }
             }
         }

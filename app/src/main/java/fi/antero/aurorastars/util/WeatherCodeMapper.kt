@@ -1,19 +1,22 @@
 package fi.antero.aurorastars.util
 
+import fi.antero.aurorastars.R
+
 object WeatherCodeMapper {
-    fun descriptionFi(weatherCode: Int): String {
+
+    fun getDescriptionResId(weatherCode: Int): Int {
         return when (weatherCode) {
-            0 -> "Selkeää"
-            1 -> "Enimmäkseen selkeää"
-            2 -> "Puolipilvistä"
-            3 -> "Pilvistä"
-            45, 48 -> "Sumuista"
-            51, 53, 55 -> "Tihkusadetta"
-            61, 63, 65 -> "Sadetta"
-            71, 73, 75 -> "Lunta"
-            80, 81, 82 -> "Kuurosadetta"
-            95, 96, 99 -> "Ukkosta"
-            else -> "Vaihtuvaa"
+            0 -> R.string.weather_clear
+            1 -> R.string.weather_mostly_clear
+            2 -> R.string.weather_partly_cloudy
+            3 -> R.string.weather_overcast
+            45, 48 -> R.string.weather_fog
+            51, 53, 55 -> R.string.weather_drizzle
+            61, 63, 65 -> R.string.weather_rain
+            71, 73, 75 -> R.string.weather_snow
+            80, 81, 82 -> R.string.weather_showers
+            95, 96, 99 -> R.string.weather_thunderstorm
+            else -> R.string.weather_unknown
         }
     }
 }

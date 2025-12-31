@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import fi.antero.aurorastars.data.model.weather.WeatherData
 import fi.antero.aurorastars.util.WeatherCodeMapper
@@ -16,7 +17,8 @@ import fi.antero.aurorastars.util.weatherIcon
 
 @Composable
 fun WeatherMainInfo(data: WeatherData) {
-    val description = WeatherCodeMapper.descriptionFi(data.weatherCode)
+
+    val description = stringResource(WeatherCodeMapper.getDescriptionResId(data.weatherCode))
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(

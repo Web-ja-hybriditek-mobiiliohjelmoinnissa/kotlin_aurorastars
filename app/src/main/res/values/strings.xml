@@ -45,7 +45,7 @@
     <string name="info_tech_title">Teknologiat</string>
     <string name="info_tech_desc">Kotlin, Jetpack Compose, Ktor.</string>
     <string name="info_author_title">Tekijä</string>
-    <string name="info_author_name">Oma Nimi</string>
+    <string name="info_author_name">Antero / Opiskelija</string>
     <string name="info_credits_title">Lähdeaineisto</string>
     <string name="credit_virtualsky_title">VirtualSky</string>
     <string name="credit_virtualsky_license">BSD 3-Clause</string>
@@ -59,4 +59,31 @@
     <string name="time_day">Päivä</string>
     <string name="time_evening">Ilta</string>
     <string name="time_night">Yö</string>
+
+    <string name="weather_clear">Selkeää</string>
+    <string name="weather_mostly_clear">Enimmäkseen selkeää</string>
+    <string name="weather_partly_cloudy">Puolipilvistä</string>
+    <string name="weather_overcast">Pilvistä</string>
+    <string name="weather_fog">Sumuista</string>
+    <string name="weather_drizzle">Tihkusadetta</string>
+    <string name="weather_rain">Sadetta</string>
+    <string name="weather_snow">Lunta</string>
+    <string name="weather_showers">Kuurosadetta</string>
+    <string name="weather_thunderstorm">Ukkosta</string>
+    <string name="weather_unknown">Vaihtuvaa</string>
+
+    <string name="error_location_not_found">Sijaintia ei saatu. Tarkista GPS ja luvat.</string>
+    <string name="error_location_permission_denied">Sijaintilupa puuttuu. Hyväksy lupa asetuksista.</string>
+    <string name="error_location_unknown">Virhe sijaintia haettaessa.</string>
+
+    <string name="location_gate_description">Tarvitsemme sijainnin, jotta voimme näyttää sään ja taivaan tämänhetkisessä paikassa.</string>
+    <string name="location_gate_button">Salli sijainti</string>
+
+    <string name="error_no_network">Ei verkkoyhteyttä. Tarkista yhteys.</string>
+    <string name="error_timeout">Yhteys aikakatkaistiin. Palvelin on hidas.</string>
+    <string name="error_api_client">Hakuvirhe (%1$d). Tarkista tiedot.</string>
+    <string name="error_api_server">Palvelinvirhe (%1$d). Yritä myöhemmin.</string>
+    <string name="error_api_redirect">Odottamaton uudelleenohjaus.</string>
+    <string name="error_api_unknown">Tuntematon verkkovirhe.</string>
+
 </resources>

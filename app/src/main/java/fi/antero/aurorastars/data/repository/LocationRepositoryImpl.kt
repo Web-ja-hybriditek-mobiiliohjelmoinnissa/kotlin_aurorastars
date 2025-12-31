@@ -17,12 +17,13 @@ class LocationRepositoryImpl(
                 if (location != null) {
                     Result.Success(location)
                 } else {
-                    Result.Error("Sijaintia ei saatu. Tarkista GPS ja luvat.")
+
+                    Result.Error("LOCATION_NOT_FOUND")
                 }
             } catch (e: SecurityException) {
-                Result.Error("Sijaintilupa puuttuu. Hyväksy lupa asetuksista.")
+                Result.Error("PERMISSION_DENIED")
             } catch (e: Exception) {
-                Result.Error("Virhe sijaintia haettaessa: ${e.message}")
+                Result.Error(e.message ?: "UNKNOWN_LOCATION_ERROR")
             }
         }
     }
