@@ -64,7 +64,6 @@ fun SkyScreen(navController: NavController) {
                 LoadingIndicator()
             }
             if (locState.error != null) {
-
                 ErrorMessage(errorCode = locState.error)
 
                 Button(onClick = { locationViewModel.loadLocation() }) {

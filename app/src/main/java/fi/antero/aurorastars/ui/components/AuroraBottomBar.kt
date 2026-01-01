@@ -17,7 +17,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import fi.antero.aurorastars.R
 import fi.antero.aurorastars.navigation.Routes
 
-
 private data class BottomNavItem(
     val route: String,
     val labelResId: Int,
