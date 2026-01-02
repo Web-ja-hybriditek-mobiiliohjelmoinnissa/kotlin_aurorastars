@@ -15,7 +15,7 @@ class GeocoderDataSource(private val context: Context) {
     suspend fun getPlaceName(lat: Double, lon: Double): String {
         return withContext(Dispatchers.IO) {
             try {
-                val geocoder: Geocoder = Geocoder(context, Locale("fi", "FI"))
+                val geocoder = Geocoder(context, Locale.getDefault())
 
                 val addresses: List<Address> = if (Build.VERSION.SDK_INT >= 33) {
                     suspendCancellableCoroutine { cont ->
@@ -33,12 +33,12 @@ class GeocoderDataSource(private val context: Context) {
                     val locality: String? = a.locality
                     val subAdmin: String? = a.subAdminArea
                     val admin: String? = a.adminArea
-                    locality ?: subAdmin ?: admin ?: "Lähialue"
+                    locality ?: subAdmin ?: admin ?: "LOCATION_FALLBACK"
                 } else {
-                    "Lähialue"
+                    "LOCATION_FALLBACK"
                 }
             } catch (e: Exception) {
-                "Lähialue"
+                "LOCATION_FALLBACK"
             }
         }
     }

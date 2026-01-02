@@ -25,11 +25,11 @@ class AuroraRemoteDataSource {
 
                 val lastRow: List<String> =
                     raw.lastOrNull { it.size >= 2 && it[0] != "time_tag" }
-                        ?: return Result.Error("Kp-data puuttuu")
+                        ?: return Result.Error("KP_DATA_MISSING")
 
                 val timeTag: String = lastRow[0]
                 val kpIndex: Double = lastRow[1].toDoubleOrNull()
-                    ?: return Result.Error("Virheellinen kp-arvo")
+                    ?: return Result.Error("KP_DATA_INVALID")
 
                 Result.Success(
                     NoaaPlanetaryKIndexEntry(
@@ -38,7 +38,6 @@ class AuroraRemoteDataSource {
                     )
                 )
             }
-
             is Result.Error -> Result.Error(responseResult.message)
             Result.Loading -> Result.Loading
         }

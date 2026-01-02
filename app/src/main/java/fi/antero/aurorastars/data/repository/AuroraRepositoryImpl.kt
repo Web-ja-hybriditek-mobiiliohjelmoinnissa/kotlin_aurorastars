@@ -21,7 +21,6 @@ class AuroraRepositoryImpl(
                 when (val res = remote.fetchLatestKp()) {
                     is Result.Success -> {
                         val entry = res.data
-
                         val probability = calculateProbability(entry.kpIndex, region)
 
                         Result.Success(
@@ -32,12 +31,11 @@ class AuroraRepositoryImpl(
                             )
                         )
                     }
-
                     is Result.Error -> Result.Error(res.message)
                     Result.Loading -> Result.Loading
                 }
             } catch (e: Exception) {
-                Result.Error("Virhe revontulidatassa: ${e.localizedMessage}")
+                Result.Error("AURORA_DATA_ERROR")
             }
         }
     }
@@ -48,12 +46,8 @@ class AuroraRepositoryImpl(
             Region.CENTRAL -> 3.5
             Region.SOUTH -> 5.0
         }
-
         val diff = kp - baseKp
         val baseProb = 50.0 + (diff * 25.0)
-
         return baseProb.roundToInt().coerceIn(0, 100)
     }
-
-
 }

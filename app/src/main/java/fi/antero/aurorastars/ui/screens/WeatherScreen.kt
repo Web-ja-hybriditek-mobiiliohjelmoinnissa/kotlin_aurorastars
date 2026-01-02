@@ -84,12 +84,17 @@ fun WeatherScreen(navController: NavController) {
                 }
 
                 data != null -> {
-                    WeatherMainInfo(data)
+                    val displayData = if (data.placeName == "LOCATION_UNKNOWN_PLACE") {
+                        data.copy(placeName = stringResource(R.string.location_unknown_place))
+                    } else {
+                        data
+                    }
 
-                    WeatherDetailsSection(data)
+                    WeatherMainInfo(displayData)
+                    WeatherDetailsSection(displayData)
 
                     ForecastRow(
-                        forecasts = data.forecasts,
+                        forecasts = displayData.forecasts,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 24.dp, bottom = 16.dp)

@@ -21,13 +21,12 @@ class WeatherRepositoryImpl(
 ) : WeatherRepository {
 
     override suspend fun getWeather(lat: Double, lon: Double): Result<WeatherData> {
-
         return withContext(Dispatchers.IO) {
             try {
                 val placeName: String = try {
                     geocoder.getPlaceName(lat, lon)
                 } catch (e: Exception) {
-                    "Tuntematon sijainti"
+                    "LOCATION_UNKNOWN_PLACE"
                 }
 
                 val result: Result<OpenMeteoWeatherResponse> = remote.fetchWeather(lat, lon)
@@ -44,12 +43,8 @@ class WeatherRepositoryImpl(
 
                         val temperatureC: Int = dto.current?.temperature2m?.roundToInt() ?: 0
                         val weatherCode: Int = dto.current?.weatherCode ?: 0
-                        // descriptionFi POISTETTU täältä
-
                         val cloudCover: Int = dto.current?.cloudCover ?: 0
                         val windMs: Double = (dto.current?.windSpeed10m ?: 0.0) / 3.6
-
-                        val isNight: Boolean = false
 
                         val forecasts: List<ForecastItem> = buildForecasts(dto)
                         val cloudForecast: CloudCoverForecast? = buildCloudCoverForecast(dto)
@@ -59,7 +54,7 @@ class WeatherRepositoryImpl(
                                 placeName = placeName,
                                 temperatureC = temperatureC,
                                 weatherCode = weatherCode,
-                                isNight = isNight,
+                                isNight = false,
                                 sunriseTime = sunriseTime,
                                 sunsetTime = sunsetTime,
                                 cloudCoverPercent = cloudCover,
@@ -69,12 +64,11 @@ class WeatherRepositoryImpl(
                             )
                         )
                     }
-
                     is Result.Error -> Result.Error(result.message)
                     Result.Loading -> Result.Loading
                 }
             } catch (e: Exception) {
-                Result.Error("Virhe datan käsittelyssä: ${e.localizedMessage}")
+                Result.Error("WEATHER_DATA_ERROR")
             }
         }
     }
@@ -84,9 +78,7 @@ class WeatherRepositoryImpl(
 
         fun pick(idx: Int, hourVal: Int): ForecastItem? {
             if (h.temperature2m == null || h.weatherCode == null) return null
-            if (idx < 0) return null
-            if (idx >= h.temperature2m.size) return null
-            if (idx >= h.weatherCode.size) return null
+            if (idx < 0 || idx >= h.temperature2m.size || idx >= h.weatherCode.size) return null
 
             return ForecastItem(
                 hour = hourVal,
@@ -108,8 +100,6 @@ class WeatherRepositoryImpl(
         val hourly = dto.hourly ?: return null
         val times = hourly.time ?: return null
         val clouds = hourly.cloudCover ?: return null
-
-        val nowCloud = dto.current?.cloudCover ?: return null
         val currentIso = dto.current?.time ?: return null
 
         val fmt = DateTimeFormatter.ISO_DATE_TIME
@@ -118,7 +108,6 @@ class WeatherRepositoryImpl(
         fun idxClosestTo(target: LocalDateTime): Int? {
             var bestIdx: Int? = null
             var bestDiff: Long = Long.MAX_VALUE
-
             for (i in times.indices) {
                 val t = runCatching { LocalDateTime.parse(times[i], fmt) }.getOrNull() ?: continue
                 val diff = abs(java.time.Duration.between(t, target).toMinutes())
@@ -138,7 +127,7 @@ class WeatherRepositoryImpl(
         }
 
         return CloudCoverForecast(
-            now = nowCloud,
+            now = dto.current?.cloudCover ?: 0,
             h3 = pick(3),
             h6 = pick(6),
             h12 = pick(12)

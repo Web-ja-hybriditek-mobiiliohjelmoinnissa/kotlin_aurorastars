@@ -86,4 +86,12 @@
     <string name="error_api_redirect">Odottamaton uudelleenohjaus.</string>
     <string name="error_api_unknown">Tuntematon verkkovirhe.</string>
 
+    <string name="location_unknown_place">Tuntematon sijainti</string>
+    <string name="error_aurora_data">Virhe revontulidatassa.</string>
+    <string name="error_weather_data">Virhe datan käsittelyssä.</string>
+
+    <string name="location_fallback_name">Lähialue</string>
+    <string name="error_kp_missing">Kp-data puuttuu</string>
+    <string name="error_kp_invalid">Virheellinen kp-arvo</string>
+
 </resources>
