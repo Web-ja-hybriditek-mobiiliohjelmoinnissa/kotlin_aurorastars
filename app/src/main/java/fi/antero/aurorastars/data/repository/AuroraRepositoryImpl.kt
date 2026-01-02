@@ -17,17 +17,14 @@ class AuroraRepositoryImpl(
         return withContext(Dispatchers.IO) {
             try {
                 val region = RegionResolver.resolve(lat)
-
                 when (val res = remote.fetchLatestKp()) {
                     is Result.Success -> {
-                        val entry = res.data
-                        val probability = calculateProbability(entry.kpIndex, region)
-
+                        val probability = calculateProbability(res.data.kpIndex, region)
                         Result.Success(
                             AuroraData(
-                                kpIndex = entry.kpIndex,
+                                kpIndex = res.data.kpIndex,
                                 probabilityPercent = probability,
-                                timeTag = entry.timeTag
+                                timeTag = res.data.timeTag
                             )
                         )
                     }
@@ -41,13 +38,19 @@ class AuroraRepositoryImpl(
     }
 
     private fun calculateProbability(kp: Double, region: Region): Int {
-        val baseKp = when (region) {
-            Region.NORTH -> 2.0
-            Region.CENTRAL -> 3.5
-            Region.SOUTH -> 5.0
+
+        val (baseKp, multiplier) = when (region) {
+            Region.LAPLAND_NORTH -> 0.5 to 35.0
+            Region.LAPLAND_SOUTH -> 1.5 to 30.0
+            Region.NORTH_OSTROBOTHNIA -> 3.0 to 25.0
+            Region.CENTRAL_FINLAND -> 4.5 to 25.0
+            Region.SOUTH_FINLAND -> 5.8 to 40.0
         }
+
         val diff = kp - baseKp
-        val baseProb = 50.0 + (diff * 25.0)
+
+        val baseProb = 50.0 + (diff * multiplier)
+
         return baseProb.roundToInt().coerceIn(0, 100)
     }
 }
