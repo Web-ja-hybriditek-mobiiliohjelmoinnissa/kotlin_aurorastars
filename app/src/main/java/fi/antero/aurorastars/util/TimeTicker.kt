@@ -1,47 +1,23 @@
 package fi.antero.aurorastars.util
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
+import kotlinx.coroutines.flow.flow
+import java.util.Calendar
 
-@Composable
-fun rememberCurrentTimeHHmm(): String {
-    var now by remember { mutableStateOf(LocalTime.now()) }
+object TimeTicker {
 
-    LaunchedEffect(Unit) {
+    val minuteFlow = flow {
         while (true) {
-            now = LocalTime.now()
-            delay(60_000)
+            emit(Unit)
+
+
+            val calendar = Calendar.getInstance()
+            val seconds = calendar.get(Calendar.SECOND)
+            val millis = calendar.get(Calendar.MILLISECOND)
+
+            val msToNextMinute = ((60 - seconds) * 1000L) - millis
+
+            delay(msToNextMinute.coerceAtLeast(1L))
         }
     }
-
-    val fmt = DateTimeFormatter.ofPattern("HH:mm")
-    return now.format(fmt)
-}
-
-@Composable
-fun rememberCurrentDayAndTime(): String {
-    var now by remember { mutableStateOf(LocalDateTime.now()) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            now = LocalDateTime.now()
-            delay(60_000)
-        }
-    }
-
-    val fmt = DateTimeFormatter.ofPattern(
-        "EEE d.M HH:mm",
-        Locale("fi", "FI")
-    )
-
-    return now.format(fmt)
 }
