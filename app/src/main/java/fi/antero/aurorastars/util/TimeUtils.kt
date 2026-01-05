@@ -14,7 +14,7 @@ object TimeUtils {
             isoString
         }
     }
-    
+
     fun getCurrentDayAndTime(): String {
         val now = LocalDateTime.now()
         val fmt = DateTimeFormatter.ofPattern("EEE d.M. HH:mm", Locale("fi", "FI"))

@@ -13,6 +13,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -28,7 +29,8 @@ fun InfoScreen(navController: NavController) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(bottom = 16.dp),
-        verticalArrangement = Arrangement.Bottom
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PageTitle(title = stringResource(R.string.info_title))
 
