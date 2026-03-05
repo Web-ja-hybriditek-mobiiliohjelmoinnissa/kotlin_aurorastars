@@ -2,6 +2,10 @@
 
 AuroraStars on natiivi Android-sovellus revontulien, sään ja tähtitaivaan seurantaan. Sovellus on toteutettu modernilla Android-teknologialla (Kotlin + Jetpack Compose) ja se hyödyntää MVVM-arkkitehtuuria.
 
+
+## Demo videos
+https://www.youtube.com/watch?v=VsNdKL00u9c
+
 ## 📱 Ominaisuudet
 
 * **Revontuliennuste:** Laskee revontulien todennäköisyyden (%) käyttäjän sijainnin (leveyspiiri) ja reaaliaikaisen Kp-indeksin perusteella.
